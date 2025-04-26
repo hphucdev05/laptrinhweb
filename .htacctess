@@ -1,0 +1,9 @@
+RewriteEngine On
+RewriteBase /Web_TrenTruong_cursor/webdemo/
+
+# Nếu yêu cầu là file hoặc thư mục có thật thì không rewrite
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Chuyển hướng tất cả về index.php với tham số `page`
+RewriteRule ^(.*)$ index.php?page=$1 [L,QSA]
