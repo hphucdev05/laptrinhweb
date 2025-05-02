@@ -1,8 +1,12 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once(__DIR__ . '/../bootstrap.php');
 
-require_once 'config/database.php';
+require_once(__DIR__ . '/../config/database.php');
 
-if (!isset($_SESSION['admin']) || $_SESSION['admin'] != true) {
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: ' . BASE_URL . '/views/dangNhap.php');
     exit;
 }

@@ -1,20 +1,28 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+
+$bootstrapPath = __DIR__ . '/../bootstrap.php';
+echo "🔍 Đường dẫn bootstrap: $bootstrapPath<br>";
+
+if (!file_exists($bootstrapPath)) {
+    die("❌ Không tìm thấy bootstrap.php");
 }
-require_once(__DIR__ . '/../config/database.php'); // Quay lại thư mục gốc của dự án
+
+require_once($bootstrapPath);
+echo "✅ bootstrap loaded<br>";
+
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header('Location: ' . BASE_URL . '/views/dangNhap.php');
     exit;
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script type="text/javascript" src="javascript/jquery-3.7.1.min.js" ></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Akshar:wght@300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
@@ -121,43 +129,45 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
         <div id="admin--content" style="width: 80%;height:100% ; float:right;"></div>
     </div>
     <script type="text/javascript">
-        $(document).ready(function(){
-            $(".menu-detail").hide(500);
-            $("#admin--content").load("<?php echo BASE_URL; ?>/views/tongquan.php", function(){
-                $.getScript("javascript/drawChart.js", function(){// Gọi script vẽ biểu đồ
-                    veBieuDo(); // Gọi sau khi script được load
-                });
-            });
-            // Khi click vào phần tử có class "tongquan"          
-            $(".theloai").click(function(){
-                $(".menu-detail").stop(true,true).slideUp(500);
-                $(this).next(".menu-detail").stop(true,true).slideDown(500);
-            })   
-        })
-        // Khi click vào một phần tử trong .admin--menu
-        $(".admin--menu").on("click", function (e) {
-            // Nếu click KHÔNG nằm trong .menu-detail hoặc .theloai
-            if (!$(e.target).closest(".menu-detail, .theloai").length) {
-                $(".menu-detail").stop(true, true).slideUp(500);
-            }
-        
+        $(document).ready(function () {
+    $(".menu-detail").hide(500);
 
-        //khi click vào thẻ a
-        $(".menu-detail a").click(function(e){
-            let url = $(this).data("url"); // Lấy giá trị của thuộc tính data-url
-            $("#admin--content").load(url); // Tải nội dung từ URL vào phần tử #admin--content
-        }); 
-        $(".menu-detail--title .tongquan").click(function(e){
-            e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ (ví dụ thẻ <a> sẽ không chuyển trang)
-            
-            $("#admin--content").load($(this).data("url"), function(){
-                // Sau khi nội dung từ URL được load vào #admin--content,
-                // thì mới tải và thực thi file JavaScript "drawChart.js"
-                $.getScript("javascript/drawChart.js", veBieuDo);
+    // Load mặc định trang tổng quan
+    loadAdminContent("<?php echo BASE_URL; ?>/views/tongquan.php");
+
+    // Gắn sự kiện cho nút mở menu con
+    $(".theloai").on("click", function () {
+        $(".menu-detail").stop(true, true).slideUp(500);
+        $(this).next(".menu-detail").stop(true, true).slideDown(500);
+    });
+
+    // Gắn sự kiện khi click vào các link
+    $(".menu-detail a, .tongquan").on("click", function (e) {
+        e.preventDefault();
+        const url = $(this).data("url");
+        loadAdminContent(url);
+    });
+
+    // Tự động ẩn menu khi click ngoài
+    $(".admin--menu").on("click", function (e) {
+        if (!$(e.target).closest(".menu-detail, .theloai").length) {
+            $(".menu-detail").stop(true, true).slideUp(500);
+        }
+    });
+});
+
+// ✅ Tải nội dung + gắn lại hành vi sau mỗi lần load
+function loadAdminContent(url) {
+    $("#admin--content").load(url, function () {
+        if (url.includes("tongquan")) {
+            $.getScript("<?php echo BASE_URL; ?>/admin/javascript/drawChart.js", function () {
+                if (typeof veBieuDo === "function") veBieuDo();
             });
-        });
-        
-        });
+        }
+    });
+}
+
+
 
     </script>
 </body>
