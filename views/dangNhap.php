@@ -63,7 +63,7 @@
                 <div class="dang-ky vanban">
                     <span>Bạn chưa có tài khoản?</span>
                     <br>
-                    <a href="<?php echo BASE_URL; ?>/views/dangKy.php">Đăng ký</a>
+                    <a href="<?php echo BASE_URL; ?>/index.php?page=dangKy">Đăng ký</a>
                 </div>
                 <p class="chinh-sach vanban"><a href="https://ticketbox.vn/customer-terms-of-use" class="dieu-khoan"
                         target="_blank">Điều khoản sử dụng</a> và <a

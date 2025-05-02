@@ -1,0 +1,164 @@
+<?php
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+require_once(__DIR__ . '/../config/database.php'); // Quay lại thư mục gốc của dự án
+if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+    header('Location: ' . BASE_URL . '/views/dangNhap.php');
+    exit;
+}
+
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="javascript/jquery-3.7.1.min.js" ></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Akshar:wght@300..700&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
+    <style>
+        *{
+            margin:0px;
+            padding:0px;
+        }
+        a{
+            text-decoration: none;
+            color:#000000;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        body{
+            color: #000000;
+            background-color: #E9E9E9;
+            font-family: Inter;
+            font-size: 24px;
+            font-style: normal;
+            font-weight: 700;
+            line-height: normal;
+        }
+
+        #admin--panel {
+            padding: 22px;
+            background-color: #7FDBFF;
+            text-align: center;
+            font-size: clamp(16px, 40px);;
+            font-weight: 700;
+            user-select: none;
+        }
+
+
+        .admin--menu-detail .theloai{
+            color:white;
+        }
+
+        .admin--menu-detail .menu-detail a{
+            display:block;
+            padding:5px 5px 5px 15px;
+            font-size: 16px;
+            color: white;
+        }
+        .admin--menu-detail .menu-detail a:hover{
+            background-color: #79b5e9;
+            color: white;
+        }
+
+        .admin--menu-detail .theloai{
+            cursor: pointer;
+            -webkit-user-select: none;
+            user-select: none;
+            margin-bottom: 10px;
+        }
+
+        .menu-detail--title::after{
+            content: '';
+            display: block;
+            width: 80%;
+            height: 2px;
+            background-color: #ffffff;
+            margin:20px 0 20px 0 ;
+        }
+
+    </style>
+    <title>Trang ADMIN</title>
+</head>
+<body>
+    <div class="admin" style="width:100%;height:100%">
+        <div class="admin--menu" style="width: 20%;height:100% ; float:left;">
+            <h2 id="admin--panel" >ADMIN PANEL</h2>
+            <div class="admin--menu-detail" style="background-color:#000;width:100%;height:100%;min-height:100vh">
+                <div class="admin--menu-detail-content" style="margin-left:24px;padding-top:20px">
+                <div class ="menu-detail--title">
+                    <a data-url="<?php echo BASE_URL; ?>/views/tongquan.php" class="tongquan" style="cursor:pointer;color:white;-webkit-user-select: none;
+    user-select: none;">Tổng quan</a>
+                </div>
+                <div class ="menu-detail--title">
+                    <div class="theloai">Quản lý vé</div>
+                    <div class="menu-detail">
+                        <a data-url="<?php echo BASE_URL; ?>/views/quanlyveTao.php">Tạo giá vé</a>
+                        <a data-url="<?php echo BASE_URL; ?>/views/quanlyve.php">Quản lý vé</a>
+                        <a data-url="<?php echo BASE_URL; ?>/views/vedamua.php">Vé đã được mua</a>
+                    </div>
+                </div>
+                <div class ="menu-detail--title">
+                    <div class="theloai">Quản lý sự kiện</div>
+                    <div class="menu-detail">
+                        <a data-url="<?php echo BASE_URL; ?>/views/quanlysukien.php">Danh sách sự kiện</a>
+                        <a data-url="<?php echo BASE_URL; ?>/views/themsukien.php">Thêm sự kiện</a>
+                    </div>
+                </div>
+                <div class ="menu-detail--title">
+                    <div class="theloai">Quản lý người dùng</div>
+                    <div class="menu-detail">
+                        <a data-url="<?php echo BASE_URL; ?>/views/taonguoidung.php">Thêm người dùng</a>
+                        <a data-url="<?php echo BASE_URL; ?>/views/danhsachnguoidung.php">Danh sách người dùng</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div id="admin--content" style="width: 80%;height:100% ; float:right;"></div>
+    </div>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $(".menu-detail").hide(500);
+            $("#admin--content").load("<?php echo BASE_URL; ?>/views/tongquan.php", function(){
+                $.getScript("javascript/drawChart.js", function(){// Gọi script vẽ biểu đồ
+                    veBieuDo(); // Gọi sau khi script được load
+                });
+            });
+            // Khi click vào phần tử có class "tongquan"          
+            $(".theloai").click(function(){
+                $(".menu-detail").stop(true,true).slideUp(500);
+                $(this).next(".menu-detail").stop(true,true).slideDown(500);
+            })   
+        })
+        // Khi click vào một phần tử trong .admin--menu
+        $(".admin--menu").on("click", function (e) {
+            // Nếu click KHÔNG nằm trong .menu-detail hoặc .theloai
+            if (!$(e.target).closest(".menu-detail, .theloai").length) {
+                $(".menu-detail").stop(true, true).slideUp(500);
+            }
+        
+
+        //khi click vào thẻ a
+        $(".menu-detail a").click(function(e){
+            let url = $(this).data("url"); // Lấy giá trị của thuộc tính data-url
+            $("#admin--content").load(url); // Tải nội dung từ URL vào phần tử #admin--content
+        }); 
+        $(".menu-detail--title .tongquan").click(function(e){
+            e.preventDefault(); // Ngăn chặn hành vi mặc định của thẻ (ví dụ thẻ <a> sẽ không chuyển trang)
+            
+            $("#admin--content").load($(this).data("url"), function(){
+                // Sau khi nội dung từ URL được load vào #admin--content,
+                // thì mới tải và thực thi file JavaScript "drawChart.js"
+                $.getScript("javascript/drawChart.js", veBieuDo);
+            });
+        });
+        
+        });
+
+    </script>
+</body>
+</html>

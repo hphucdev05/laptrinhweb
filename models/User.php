@@ -55,8 +55,8 @@ public function login($username, $password) {
     }
 
     public function register($data) {
-        $sql = "INSERT INTO {$this->table} (username, password, email, created_at)
-                VALUES(:username, :password, :email, :created_at)";
+        $sql = "INSERT INTO {$this->table} (username, password, email, created_at,role)
+                VALUES(:username, :password, :email, :created_at, :role)";
         
         try {
             $stmt = $this->db->getConnection()->prepare($sql);
@@ -64,12 +64,28 @@ public function login($username, $password) {
             $stmt->bindParam(':username', $data['username']);
             $stmt->bindParam(':password', $data['password']);  // ← Đã hash từ controller rồi!
             $stmt->bindParam(':email', $data['email']);
+            $stmt->bindParam(':role', $data['role']);
+
+
             $stmt->bindParam(':created_at', date('Y-m-d H:i:s'));
     
             return $stmt->execute();
         } catch (PDOException $e) {
             die("❌ Lỗi SQL: " . $e->getMessage());
         }
+    }
+    public function checkLogin($username, $password) {
+        // Truy vấn cơ sở dữ liệu để tìm người dùng
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE username = :username");
+        $stmt->execute(['username' => $username]);
+        $user = $stmt->fetch();
+
+        // Kiểm tra mật khẩu
+        if ($user && password_verify($password, $user['password'])) {
+            return $user;
+        }
+
+        return false; // Nếu không có người dùng hoặc mật khẩu sai
     }
     
     

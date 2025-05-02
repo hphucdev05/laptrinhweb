@@ -32,7 +32,6 @@ switch ($page) {
     case 'dangKy':
         require __DIR__ . '/views/dangKy.php';
         break;
-
     case 'dangNhap':
         require __DIR__ . '/controllers/UserController.php';
         $controller = new UserController();
@@ -48,7 +47,9 @@ switch ($page) {
     case 'taikhoan':
         require __DIR__ . '/views/taikhoan.php';
         break;
-
+    case 'adminIndex':
+        require __DIR__ . '/views/adminIndex.php';
+        break;
     case 'dangXuat':
         require __DIR__ . '/controllers/UserController.php';
         $controller = new UserController();
@@ -57,7 +58,7 @@ switch ($page) {
 
     default:
         http_response_code(404);
-        require __DIR__ . '/views/404.html';
+        require __DIR__ . '/views/404.php';
         break;
 }
 ?>
